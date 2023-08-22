@@ -1,0 +1,843 @@
+[
+    {
+        "id": "40e83e93e3a589e2",
+        "type": "tab",
+        "label": "CattleCounterMongoDB",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "6f7b70a9f337c760",
+        "type": "group",
+        "z": "40e83e93e3a589e2",
+        "name": "En_Vivo",
+        "style": {
+            "fill": "#bfdbef",
+            "label": true
+        },
+        "nodes": [
+            "e9cdb2382ea0885a",
+            "30b07c222f165e83",
+            "deed0b94753c7694",
+            "78d6285e79644d24",
+            "e5f57861ba0bb98d",
+            "6c94e192594f5d4c"
+        ],
+        "x": 1824,
+        "y": 59,
+        "w": 662,
+        "h": 182
+    },
+    {
+        "id": "d2bb6e279b1e7a43",
+        "type": "group",
+        "z": "40e83e93e3a589e2",
+        "name": "Mostrar_Una_Imagen",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "66f6e7e8fbb3c234",
+            "b552801c1fa39268"
+        ],
+        "x": 1474,
+        "y": 199,
+        "w": 332,
+        "h": 82
+    },
+    {
+        "id": "774f01e77b36f8be",
+        "type": "group",
+        "z": "40e83e93e3a589e2",
+        "name": "Data_Manipulation",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "af5076ce3015485f",
+            "b0e969113eec45a7",
+            "11bec704283d3d5a",
+            "73a95308f9177ab4",
+            "fe8786b21e6bac13"
+        ],
+        "x": 194,
+        "y": 139,
+        "w": 1232,
+        "h": 82
+    },
+    {
+        "id": "756dcd626c9bbd40",
+        "type": "group",
+        "z": "40e83e93e3a589e2",
+        "name": "Insert_DB",
+        "style": {
+            "label": true
+        },
+        "nodes": [
+            "282414307d965e77",
+            "be0fd44ef4694219"
+        ],
+        "x": 1614,
+        "y": 299,
+        "w": 472,
+        "h": 122
+    },
+    {
+        "id": "b33157d8a1d94a1f",
+        "type": "tcp in",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "server": "server",
+        "host": "",
+        "port": "1888",
+        "datamode": "stream",
+        "datatype": "base64",
+        "newline": "",
+        "topic": "",
+        "trim": false,
+        "base64": false,
+        "tls": "",
+        "x": 80,
+        "y": 180,
+        "wires": [
+            [
+                "af5076ce3015485f",
+                "d24bdbbf2481ab76"
+            ]
+        ]
+    },
+    {
+        "id": "af5076ce3015485f",
+        "type": "base64",
+        "z": "40e83e93e3a589e2",
+        "g": "774f01e77b36f8be",
+        "name": "",
+        "action": "b64",
+        "property": "payload",
+        "x": 280,
+        "y": 180,
+        "wires": [
+            [
+                "b0e969113eec45a7"
+            ]
+        ]
+    },
+    {
+        "id": "b0e969113eec45a7",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "774f01e77b36f8be",
+        "name": "String_To_JSON_Handler",
+        "func": "let objQ = flow.get(\"objQ\") || [];\nvar x = msg.payload.replaceAll(\"nfc/RunData\", \"\");\nx = x.replaceAll(\"0v\", \"\");\nif (x.length == 107) {\n    x = JSON.parse(x.substring(2, 107)); \n//converts the String to JSON\n    objQ.push(x); \n    flow.set(\"objQ\", objQ); \n    msg.payload = x\n    return msg;\n} else {\n    //let n = Math.floor(x.length / 107);\n    x = x.split(\"[^A-Za-z0-9]\"); // split on any non-alphanumeric characters\n    let tmpArr = []\n    for (let i = 0; i < x.length; i++) {\n        let tmpStr = x[0].substring(2, 107);\n        objQ.push(x); // push IDs to Queues\n        tmpArr.push({ payload: JSON.parse(tmpStr) })\n\n    }\n    flow.set(\"objQ\", objQ);\n    return tmpArr;\n}\n//We create an array of message to avoid a discrepancy between the images and teh array\n// What errors might appear here lets debug these too",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 490,
+        "y": 180,
+        "wires": [
+            [
+                "11bec704283d3d5a",
+                "feb68c228589a987"
+            ]
+        ]
+    },
+    {
+        "id": "11bec704283d3d5a",
+        "type": "http request",
+        "z": "40e83e93e3a589e2",
+        "g": "774f01e77b36f8be",
+        "name": "",
+        "method": "GET",
+        "ret": "bin",
+        "paytoqs": "ignore",
+        "url": "http://172.16.20.131/Streaming/channels/1/picture",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "basic",
+        "senderr": false,
+        "headers": [],
+        "x": 750,
+        "y": 180,
+        "wires": [
+            [
+                "73a95308f9177ab4"
+            ]
+        ]
+    },
+    {
+        "id": "73a95308f9177ab4",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "774f01e77b36f8be",
+        "name": "Add image to Queue",
+        "func": "let imgQ = flow.get(\"imgQ\") || [];\nvar x = msg.payload.toString('base64');\nimgQ.push(x);\nflow.set(\"imgQ\", imgQ);\nmsg.payload = x;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1040,
+        "y": 180,
+        "wires": [
+            [
+                "706ee9ce27d7cc1b",
+                "fe8786b21e6bac13"
+            ]
+        ]
+    },
+    {
+        "id": "0fccc7557c0c1d29",
+        "type": "comment",
+        "z": "40e83e93e3a589e2",
+        "name": "Comentario Inicial",
+        "info": "Este segmento inicial maneja lo que es JSO (JavaScript Object) \ne imagenes. ",
+        "x": 210,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "fe8786b21e6bac13",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "774f01e77b36f8be",
+        "name": "StableQueue&Check",
+        "func": "/*Retrieve both image and object queues*/ \nlet objQ = flow.get('objQ') || [];\nlet imgQ = flow.get('imgQ') || []; \n\n\n//Verify the Queues are not empty\nif (objQ.length > 0 && imgQ.length > 0) {\n    // get the current value\n    var currObj = objQ[0]\n    var img = imgQ[0]\n    //erase first value for each array \n    imgQ.shift();\n    objQ.shift();\n    //renovate values of arrays \n    flow.set(\"imgQ\", imgQ);\n    flow.set(\"objQ\", objQ);\n    //lets check if the image renders \n    //return [{ payload: 1 }, { payload: currObj.hasOwnProperty(\"DATA\") && img.length > 90000 && currObj.DATA[0].tagID != \"303426FF984FFBB001D001A9\" }];\n    if (currObj.hasOwnProperty(\"DATA\") && img.length > 90000 && currObj.DATA[0].tagID != \"303426FF984FFBB001D001A9\" ){\n        var tag = currObj.DATA[0].tagID;\n        for (let j = 0; j < tag.length; j++) {\n            if (tag.substring(j, j + 1) != \"0\") {\n                tag = tag.substring(j, tag.length);\n                break;\n            }\n        }\n        var sensorStr = currObj.deviceID;\n        var sensorArr = flow.get(\"sensorArr\") || []\n        var sLog = flow.get(sensorStr) || []; \n    //it just contains the names to avoid using extra storage\n        if(sensorArr.indexOf(sensorStr) === -1) {\n            sensorArr.push(sensorStr);\n            //flow.set(\"sensorArr\", sLog); sensor array is not implmented for now\n        }\n\n        var seen = 0; // seen is used to avoid repetitions \n        let tmpIdx = -1; // create new index \n        var tmpReg = null;\n\n        var dateTmp = new Date()\n        var dateStr = dateTmp.toString();\n        var parts = dateStr.split(\" \");\n        var timeArr = parts[4].split(\":\");\n        var timeStr = (parseInt(timeArr[0]) + 1) + \":\" + timeArr[1] + \":\" + timeArr[2]; // Include seconds in the time string\n        var date_d = (dateTmp.getMonth() + 1) > 9 ? (dateTmp.getMonth() + 1) + \"/\" + parts[2] + \"/\" + parts[3] : \"0\" + (dateTmp.getMonth() + 1) + \"/\" + parts[2] + \"/\" + parts[3];\n        \n        // check for repetitions \n        for (let i = 0; i < sLog.length; i++){\n            if (sLog[i].cid == tag) {\n                seen = 1;\n                tmpIdx = i;\n                var timeCmp = sLog[tmpIdx].hora.split(\":\");\n                // if we read the same value again after 1 hour or twenty minutes include the cow\n                // lets work on including mongodb db fo each database to keep a temporal log\n                if (parseInt(timeArr[0]) - parseInt(timeCmp[0]) > 1) {\n                    var timeStr = timeArr[0] + \":\" + timeArr[1] + \":\" + timeArr[2];\n                    // Include seconds in the time string\n                    var day = dateTmp.getMonth() > 9 ? dateTmp.getMonth() + \"/\" + parts[2] + \"/\" + parts[3] : \"0\" + dateTmp.getMonth() + \"/\" + parts[2] + \"/\" + parts[3];\n                    var date_d = day\n                    sLog[tmpIdx].hora = timeStr; // we only update if we see log\n                    //sLog[tmpIdx][1] = date_t; // not useful for keys\n                    sLog[tmpIdx].imagen = img;\n                    tmpReg = sLog[tmpIdx];\n                    flow.set(sensorStr, sLog);  \n                    \n                }\n            }\n        }\n    \n        if (seen === 0) {\n            //time set//    \n            tmpReg = {fecha:date_d, hora: timeStr, cid: tag, sensor: sensorStr, imagen: img} \n            sLog.push(tmpReg);\n            flow.set(sensorStr, sLog)\n        }\n\n        var msg1 = { payload: tag}; // real_time log for respective sensor\n        var msg2 = { payload: tmpReg }; // can be a new image or null\n\n        return [msg1, msg2]\n    }\n}\n",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1300,
+        "y": 180,
+        "wires": [
+            [
+                "d7fc05473a88c946"
+            ],
+            [
+                "66f6e7e8fbb3c234",
+                "2e7fba564b6b508d",
+                "30f3cbc7c7db0267"
+            ]
+        ]
+    },
+    {
+        "id": "60fe2d10178fe6dc",
+        "type": "comment",
+        "z": "40e83e93e3a589e2",
+        "name": "Llave",
+        "info": "Este Time stamp establece un llave\ncompuesta por la fecha.  Esto se utiliza para verificar la integridad de\nde los datos que han entrado a las base datos ",
+        "x": 90,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "282414307d965e77",
+        "type": "mongodb-aleph-out",
+        "z": "40e83e93e3a589e2",
+        "g": "756dcd626c9bbd40",
+        "mongodb": "600ad0aa48af0a75",
+        "name": "",
+        "collection": "Test5",
+        "payonly": false,
+        "upsert": false,
+        "multi": false,
+        "operation": "insert",
+        "x": 1850,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "66f6e7e8fbb3c234",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "d2bb6e279b1e7a43",
+        "name": "ShowImg",
+        "func": "if(msg.payload !== null){\n    var msg1 = {payload: msg.payload.imagen};\n    node.send(msg1);\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 240,
+        "wires": [
+            [
+                "b552801c1fa39268"
+            ]
+        ]
+    },
+    {
+        "id": "b552801c1fa39268",
+        "type": "ui_template",
+        "z": "40e83e93e3a589e2",
+        "g": "d2bb6e279b1e7a43",
+        "group": "dce0c4e79237565e",
+        "name": "",
+        "order": 13,
+        "width": 0,
+        "height": 0,
+        "format": "<!DOCTYPE html>\n<html>\n    <br>\n    <br>\n    <header>\n    </header>\n    <body>\n        <style>\n            img {\n                width: 740px;\n                height: 460px;\n                border: 1px solid #ddd;\n                border-radius: 8px;\n                padding: 2px; \n            }\n        </style>\n        <center>\n            <br>\n            <h1>Imagen Registrada</h1>\n            <table>\n                <tr>\n                    <!-- Row 1 -->\n                    <td style=\"text-align: center\"><img alt=\"Camera Snapshot\" src=\"data:image/jpg;base64,{{msg.payload}}\" />\n                    </td>\n                </tr>\n            </table>\n        </center>\n    </body>\n</html>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1720,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d7fc05473a88c946",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "name": "RealTimeLog",
+        "func": "var rLog = flow.get('realLog') || [];\nvar tag = msg.payload; \nif (rLog.indexOf(tag) == -1 && tag != \"303426FF984FFBB001D001A9\" ){\n    rLog.push(tag)\n    flow.set('realLog', rLog)\n}\nmsg.payload = rLog.length;\nnode.send(msg);\n\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 140,
+        "wires": [
+            [
+                "78d6285e79644d24"
+            ]
+        ]
+    },
+    {
+        "id": "e5f57861ba0bb98d",
+        "type": "inject",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "120",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1990,
+        "y": 200,
+        "wires": [
+            [
+                "6c94e192594f5d4c"
+            ]
+        ]
+    },
+    {
+        "id": "e9cdb2382ea0885a",
+        "type": "ui_gauge",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "",
+        "group": "dce0c4e79237565e",
+        "order": 2,
+        "width": 16,
+        "height": 5,
+        "gtype": "gage",
+        "title": "",
+        "label": "units",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "120",
+        "colors": [
+            "#ca3838",
+            "#e6e600",
+            "#00f900"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "registroTotal",
+        "x": 2410,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "30b07c222f165e83",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "Set Limit",
+        "func": "var limite = msg.payload;\nif(msg.payload > 120){\n    flow.set(\"limite\", limite);\n    msg = { ui_control: { max: msg.payload } };\n    return msg\n}\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2180,
+        "y": 100,
+        "wires": [
+            [
+                "e9cdb2382ea0885a"
+            ]
+        ]
+    },
+    {
+        "id": "deed0b94753c7694",
+        "type": "ui_text_input",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "group": "dce0c4e79237565e",
+        "order": 12,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "mode": "number",
+        "delay": 300,
+        "topic": "topic",
+        "sendOnBlur": true,
+        "className": ".gauge",
+        "topicType": "msg",
+        "x": 1930,
+        "y": 100,
+        "wires": [
+            [
+                "30b07c222f165e83"
+            ]
+        ]
+    },
+    {
+        "id": "78d6285e79644d24",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "Gauge_Set",
+        "func": "if(msg.payload > 120) {\n    msg = { payload: msg.payload, ui_control: { max: msg.payload } };\n    return msg\n}else{\n    msg = {payload: msg.payload};\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1970,
+        "y": 160,
+        "wires": [
+            [
+                "e9cdb2382ea0885a"
+            ]
+        ]
+    },
+    {
+        "id": "6c94e192594f5d4c",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "g": "6f7b70a9f337c760",
+        "name": "RefreshLog",
+        "func": "flow.set('realLog', [])\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2150,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "be0fd44ef4694219",
+        "type": "comment",
+        "z": "40e83e93e3a589e2",
+        "g": "756dcd626c9bbd40",
+        "name": "DB Info",
+        "info": "El nombre de la bases es Cattle Counter. \nLa collección especificada es Tests",
+        "x": 1710,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "d24bdbbf2481ab76",
+        "type": "debug",
+        "z": "40e83e93e3a589e2",
+        "name": "debug 100",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 290,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "2e7fba564b6b508d",
+        "type": "function",
+        "z": "40e83e93e3a589e2",
+        "name": "check_null",
+        "func": "if(msg.payload !== null){\n    return {payload: msg.payload};\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1370,
+        "y": 340,
+        "wires": [
+            [
+                "7eca7f8a539720f4",
+                "282414307d965e77"
+            ]
+        ]
+    },
+    {
+        "id": "7eca7f8a539720f4",
+        "type": "debug",
+        "z": "40e83e93e3a589e2",
+        "name": "debug 101",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1450,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "706ee9ce27d7cc1b",
+        "type": "debug",
+        "z": "40e83e93e3a589e2",
+        "name": "img string",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 920,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "feb68c228589a987",
+        "type": "debug",
+        "z": "40e83e93e3a589e2",
+        "name": "ObjectDebug",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 650,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "30f3cbc7c7db0267",
+        "type": "debug",
+        "z": "40e83e93e3a589e2",
+        "name": "debug 106",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1530,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "85aa844c4beaf4ca",
+        "type": "ui_template",
+        "z": "40e83e93e3a589e2",
+        "group": "f6f651325d4d14a5",
+        "name": "",
+        "order": 15,
+        "width": 0,
+        "height": 0,
+        "format": "<script id=\"titleScript\" type=\"text/javascript\">\n    $('#clock').remove(); // removes object with ID clock\n    var toolbar = $('.md-toolbar-tools'); // \n    var div = $('<div></div>'); // \n    var p = $('<p/ id=\"clock\">');\n    $('#titleScript').parent().hide();\n    div.append(p);\n    div[0].style.margin = '5px 5px 5px auto';\n    toolbar.append(div);\n\n    function displayTitle(lh) {\n        p.text(lh); \n    }\n    \n    function upTime() {\n        var d = new Date();\n        p.text(d.toLocaleTimeString('de-AT'));\n    }\n\n    // Watch the payload and update the title\n    (function(scope) {\n        scope.$watch('msg.payload', function(data) {\n            if (data.match(\"systemsummary\")) { //Systemstatus\n                m = data;\n                n = m.split(':');\n                //alert(n[1]);\n                var sSummary = parseInt(n[1], 10);\n                if(sSummary === 14){\n                    document.getElementById(\"clock\").style.backgroundColor =\"transparent\";\n                }\n                if(sSummary < 14){\n                    document.getElementById(\"clock\").style.backgroundColor =\"#FF0033\";\n                }\n            }else{\n                displayTitle(data);\n            }\n        });\n        setInterval(upTime,1000);\n    })(scope);\n</script>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1320,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "d66155738e402060",
+        "type": "inject",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1160,
+        "y": 100,
+        "wires": [
+            [
+                "85aa844c4beaf4ca"
+            ]
+        ]
+    },
+    {
+        "id": "05a3630efd9e9f8b",
+        "type": "ui_button",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "group": "f6f651325d4d14a5",
+        "order": 2,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Busqueda Computadora",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "{\"tab\": \"Busqueda Computadora\"}",
+        "payloadType": "json",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 670,
+        "y": 520,
+        "wires": [
+            [
+                "a2a499c36996bc4a"
+            ]
+        ]
+    },
+    {
+        "id": "a2a499c36996bc4a",
+        "type": "ui_ui_control",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "events": "all",
+        "x": 980,
+        "y": 540,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1856ca55e6e68c46",
+        "type": "ui_button",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "group": "f6f651325d4d14a5",
+        "order": 5,
+        "width": 4,
+        "height": 1,
+        "passthru": false,
+        "label": "Registro Zona 1",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "{\"tab\":  \"Zona 1\"}",
+        "payloadType": "json",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 660,
+        "y": 460,
+        "wires": [
+            [
+                "a2a499c36996bc4a"
+            ]
+        ]
+    },
+    {
+        "id": "bf8ca75520e57740",
+        "type": "ui_ui_control",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "events": "all",
+        "x": 1060,
+        "y": 400,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f6143787b859ce6a",
+        "type": "ui_button",
+        "z": "40e83e93e3a589e2",
+        "name": "",
+        "group": "609da94cac2db2f7",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "passthru": false,
+        "label": "Log de Formulario",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "{\"tab\": \"Log\"}",
+        "payloadType": "json",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 690,
+        "y": 400,
+        "wires": [
+            [
+                "bf8ca75520e57740"
+            ]
+        ]
+    },
+    {
+        "id": "ab95404d78fea619",
+        "type": "ui_spacer",
+        "z": "40e83e93e3a589e2",
+        "name": "spacer",
+        "group": "9458c1e8db283730",
+        "order": 1,
+        "width": 28,
+        "height": 1
+    },
+    {
+        "id": "e42ec398291e97d3",
+        "type": "ui_spacer",
+        "z": "40e83e93e3a589e2",
+        "name": "spacer",
+        "group": "9458c1e8db283730",
+        "order": 2,
+        "width": 28,
+        "height": 1
+    },
+    {
+        "id": "600ad0aa48af0a75",
+        "type": "mongodb-aleph-config",
+        "hostname": "s23-w4111.1cobx7l.mongodb.net",
+        "topology": "dnscluster",
+        "connectOptions": "",
+        "port": "27017",
+        "db": "CattleCounter",
+        "name": ""
+    },
+    {
+        "id": "dce0c4e79237565e",
+        "type": "ui_group",
+        "name": "Registro en Vivo Zona 1",
+        "tab": "2345502687bf396d",
+        "order": 2,
+        "disp": true,
+        "width": "18",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "f6f651325d4d14a5",
+        "type": "ui_group",
+        "d": true,
+        "name": "Menu",
+        "tab": "2415468c2e626d76",
+        "order": 2,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "609da94cac2db2f7",
+        "type": "ui_group",
+        "name": "Busqueda",
+        "tab": "ad479e14da6d6964",
+        "order": 1,
+        "disp": true,
+        "width": "28",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9458c1e8db283730",
+        "type": "ui_group",
+        "name": "Tabla Diaria de Animales",
+        "tab": "212cf9f606e77e80",
+        "order": 1,
+        "disp": false,
+        "width": "28",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2345502687bf396d",
+        "type": "ui_tab",
+        "name": "Zona 1",
+        "icon": "dashboard",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "2415468c2e626d76",
+        "type": "ui_tab",
+        "name": "Menu",
+        "icon": "dashboard",
+        "order": 4,
+        "disabled": false,
+        "hidden": true
+    },
+    {
+        "id": "ad479e14da6d6964",
+        "type": "ui_tab",
+        "name": "Busqueda Computadora",
+        "icon": "dashboard",
+        "order": 6,
+        "disabled": false,
+        "hidden": true
+    },
+    {
+        "id": "212cf9f606e77e80",
+        "type": "ui_tab",
+        "name": "Tabla Diaria de Animales",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]
